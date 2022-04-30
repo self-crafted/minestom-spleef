@@ -44,7 +44,7 @@ public class Server {
         });
 
         // Start server
-        if (!VELOCITY_SECRET.isBlank()) VelocityProxy.enable(VELOCITY_SECRET);
+        if (VELOCITY_SECRET != null) VelocityProxy.enable(VELOCITY_SECRET);
         server.start("0.0.0.0", 25565);
     }
 
