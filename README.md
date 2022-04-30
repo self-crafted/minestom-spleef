@@ -1,2 +1,2 @@
 ### minestom-spleef
-It's simple Spleef built on Minestom.
+It's simply Spleef built on Minestom.
