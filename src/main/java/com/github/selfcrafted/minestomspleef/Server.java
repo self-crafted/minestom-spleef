@@ -2,16 +2,18 @@ package com.github.selfcrafted.minestomspleef;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.instance.AnvilLoader;
+import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.DynamicChunk;
+import net.minestom.server.instance.IChunkLoader;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.instance.generator.GenerationUnit;
-import net.minestom.server.instance.generator.Generator;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class Server {
     public static final String VERSION = "&version";
@@ -34,13 +36,15 @@ public class Server {
 
         // Add lobby instance
         final var lobbyInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
-        lobbyInstance.setTime(-12000);
-        lobbyInstance.setChunkLoader(new AnvilLoader("lobby"));
-        lobbyInstance.setGenerator(new LobbyGenerator());
+        lobbyInstance.setTime(-6000);
+        lobbyInstance.setTimeRate(0);
+        lobbyInstance.setTimeUpdate(null);
+        lobbyInstance.setChunkLoader(new LobbyGenerator());
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
             event.setSpawningInstance(lobbyInstance);
-            event.getPlayer().setRespawnPoint(new Pos(0, 100.5, 0));
+            event.getPlayer().setRespawnPoint(new Pos(7.5, 101, 7.5));
+            event.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
 
         // Start server
@@ -48,22 +52,29 @@ public class Server {
         server.start("0.0.0.0", 25565);
     }
 
-    private static class LobbyGenerator implements Generator {
+    private static class LobbyGenerator implements IChunkLoader {
         @Override
-        public void generate(@NotNull GenerationUnit unit) {
-            final var start = unit.absoluteStart();
-            final var end = unit.absoluteEnd();
-            final var modifier = unit.modifier();
+        public @NotNull CompletableFuture<@Nullable Chunk> loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+            Chunk chunk = new DynamicChunk(instance, chunkX, chunkZ);
+            if (chunkX == 0 && chunkZ == 0) {
+                for (int x = 0; x <= 16; x++)
+                    for (int z = 0; z <= 16; z++) {
+                        chunk.setBlock(x, 100, z, Block.QUARTZ_PILLAR);
+                        chunk.setBlock(x, 98, z, Block.IRON_BLOCK);
+                        if (x%15 == 0 || z%15 == 0) {
+                            chunk.setBlock(x, 101, z, Block.TINTED_GLASS);
+                            chunk.setBlock(x, 102, z, Block.BARRIER);
+                        }
+                    }
+                chunk.setBlock(7, 100, 7, Block.RED_STAINED_GLASS);
+                chunk.setBlock(7, 99, 7, Block.BEACON);
+            }
+            return CompletableFuture.completedFuture(chunk);
+        }
 
-            modifier.fill(new Pos(-10, 101, 10), new Pos(10, 101, 10), Block.ACACIA_FENCE);
-            modifier.fill(new Pos(-10, 101, 10), new Pos(-10, 101, -10), Block.ACACIA_FENCE);
-            modifier.fill(new Pos(10, 101, -10), new Pos(10, 101, 10), Block.ACACIA_FENCE);
-            modifier.fill(new Pos(10, 101, -10), new Pos(-10, 101, -10), Block.ACACIA_FENCE);
-
-            modifier.fill(new Pos(-10, 100, 10), new Pos(-10, 100, 10), Block.IRON_BLOCK);
-            modifier.setBlock(0, 100, 0, Block.RED_STAINED_GLASS);
-            modifier.setBlock(0, 99, 0, Block.BEACON);
-            modifier.fill(new Pos(-1, 98, 1), new Pos(-1, 98, 1), Block.IRON_BLOCK);
+        @Override
+        public @NotNull CompletableFuture<Void> saveChunk(@NotNull Chunk chunk) {
+            return CompletableFuture.completedFuture(null);
         }
     }
 }
