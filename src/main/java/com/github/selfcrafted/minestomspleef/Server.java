@@ -10,6 +10,8 @@ import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.IChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.generator.GenerationUnit;
+import net.minestom.server.instance.generator.Generator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,6 +72,50 @@ public class Server {
                 chunk.setBlock(7, 99, 7, Block.BEACON);
             }
             return CompletableFuture.completedFuture(chunk);
+        }
+
+        @Override
+        public @NotNull CompletableFuture<Void> saveChunk(@NotNull Chunk chunk) {
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    private static class ArenaGenerator implements IChunkLoader, Generator {
+        private static final Pos START = new Pos(7, 100, 7);
+
+        private final Pos min;
+        private final Pos max;
+
+        private ArenaGenerator(int size) {
+            this.min = START.add(size/2.0, 0, size/2.0);
+            this.max = START.sub(size/2.0, 0, size/2.0);
+        }
+
+        @Override
+        public void generate(@NotNull GenerationUnit unit) {
+            final var minimumX = Math.max(unit.absoluteStart().blockX(), this.min.blockX());
+            final var minimumZ = Math.max(unit.absoluteStart().blockZ(), this.min.blockZ());
+            final var maximumX = Math.min(unit.absoluteEnd().blockX(), this.max.blockX());
+            final var maximumZ = Math.min(unit.absoluteEnd().blockZ(), this.max.blockZ());
+
+            final var modifier = unit.modifier();
+
+            if (minimumX == this.min.blockX()) modifier.fill(this.min.withZ(minimumZ),
+                    this.min.withZ(maximumZ).add(0, 10, 0), Block.CYAN_STAINED_GLASS);
+            if (minimumZ == this.min.blockZ()) modifier.fill(this.min.withX(minimumX),
+                    this.min.withX(maximumX).add(0, 10, 0), Block.CYAN_STAINED_GLASS);
+            if (minimumX == this.max.blockX()) modifier.fill(this.max.withZ(minimumZ),
+                    this.max.withZ(maximumZ).add(0, 10, 0), Block.CYAN_STAINED_GLASS);
+            if (minimumZ == this.max.blockZ()) modifier.fill(this.max.withX(minimumX),
+                    this.max.withX(maximumX).add(0, 10, 0), Block.CYAN_STAINED_GLASS);
+
+            modifier.fill(this.min, this.max, Block.SAND);
+            modifier.fill(this.min.add(0, 10, 0), this.max.add(0, 10, 0), Block.SEA_LANTERN);
+        }
+
+        @Override
+        public @NotNull CompletableFuture<@Nullable Chunk> loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+            return CompletableFuture.completedFuture(null);
         }
 
         @Override
