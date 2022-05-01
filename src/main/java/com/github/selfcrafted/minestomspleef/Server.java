@@ -3,6 +3,7 @@ package com.github.selfcrafted.minestomspleef;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.Chunk;
@@ -49,6 +50,17 @@ public class Server {
             event.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
 
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
+            var spleefInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
+            var spleefGame = new SpleefGame(Integer.parseInt(event.getMessage()));
+            spleefInstance.setGenerator(spleefGame);
+            spleefInstance.setChunkLoader(spleefGame);
+            spleefInstance.setTime(-6000);
+            spleefInstance.setTimeRate(0);
+            spleefInstance.setTimeUpdate(null);
+            event.getPlayer().setInstance(spleefInstance, SpleefGame.START.add(0.5, 1, 0.5));
+        });
+
         // Start server
         if (VELOCITY_SECRET != null) VelocityProxy.enable(VELOCITY_SECRET);
         server.start("0.0.0.0", 25565);
@@ -80,37 +92,34 @@ public class Server {
         }
     }
 
-    private static class ArenaGenerator implements IChunkLoader, Generator {
-        private static final Pos START = new Pos(7, 100, 7);
+    private static class SpleefGame implements IChunkLoader, Generator {
+        private static final Pos START = new Pos(7, 30, 7);
 
-        private final Pos min;
-        private final Pos max;
+        private final int arenaSize;
 
-        private ArenaGenerator(int size) {
-            this.min = START.add(size/2.0, 0, size/2.0);
-            this.max = START.sub(size/2.0, 0, size/2.0);
+        private SpleefGame(int playerCount) {
+            this.arenaSize = (int) (Math.log(playerCount)*10);
         }
 
         @Override
         public void generate(@NotNull GenerationUnit unit) {
-            final var minimumX = Math.max(unit.absoluteStart().blockX(), this.min.blockX());
-            final var minimumZ = Math.max(unit.absoluteStart().blockZ(), this.min.blockZ());
-            final var maximumX = Math.min(unit.absoluteEnd().blockX(), this.max.blockX());
-            final var maximumZ = Math.min(unit.absoluteEnd().blockZ(), this.max.blockZ());
-
             final var modifier = unit.modifier();
 
-            if (minimumX == this.min.blockX()) modifier.fill(this.min.withZ(minimumZ),
-                    this.min.withZ(maximumZ).add(0, 10, 0), Block.CYAN_STAINED_GLASS);
-            if (minimumZ == this.min.blockZ()) modifier.fill(this.min.withX(minimumX),
-                    this.min.withX(maximumX).add(0, 10, 0), Block.CYAN_STAINED_GLASS);
-            if (minimumX == this.max.blockX()) modifier.fill(this.max.withZ(minimumZ),
-                    this.max.withZ(maximumZ).add(0, 10, 0), Block.CYAN_STAINED_GLASS);
-            if (minimumZ == this.max.blockZ()) modifier.fill(this.max.withX(minimumX),
-                    this.max.withX(maximumX).add(0, 10, 0), Block.CYAN_STAINED_GLASS);
-
-            modifier.fill(this.min, this.max, Block.SAND);
-            modifier.fill(this.min.add(0, 10, 0), this.max.add(0, 10, 0), Block.SEA_LANTERN);
+            var start = unit.absoluteStart();
+            for (int x = 0; x < unit.size().x(); x++) {
+                for (int z = 0; z < unit.size().z(); z++) {
+                    var bottom = start.add(x, 0, z);
+                    var spleefLayer = bottom.withY(START.blockY());
+                    var distance = Math.floor(START.distance(spleefLayer));
+                    if (distance <= arenaSize) {
+                        var ceilingLayer = bottom.withY(START.blockY()+10);
+                        modifier.setBlock(spleefLayer, Block.SAND);
+                        modifier.setBlock(ceilingLayer, Block.SEA_LANTERN);
+                        if (distance == arenaSize) modifier.fill(spleefLayer, ceilingLayer.add(1, 1, 1),
+                                Block.LIGHT_BLUE_STAINED_GLASS);
+                    }
+                }
+            }
         }
 
         @Override
