@@ -6,10 +6,7 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.instance.Chunk;
-import net.minestom.server.instance.DynamicChunk;
-import net.minestom.server.instance.IChunkLoader;
-import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.*;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
 import net.minestom.server.instance.generator.Generator;
@@ -23,6 +20,9 @@ public class Server {
     public static final String MINESTOM_VERSION = "&minestomVersion";
 
     private static final String VELOCITY_SECRET = System.getenv("VELOCITY_SECRET");
+
+    static InstanceContainer LOBBY_INSTANCE;
+
 
     public static void main(String[] args) {
         System.setProperty("minestom.tps", "50");
@@ -38,14 +38,14 @@ public class Server {
         MinecraftServer server = MinecraftServer.init();
 
         // Add lobby instance
-        final var lobbyInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
-        lobbyInstance.setTime(-6000);
-        lobbyInstance.setTimeRate(0);
-        lobbyInstance.setTimeUpdate(null);
-        lobbyInstance.setChunkLoader(new LobbyGenerator());
+        LOBBY_INSTANCE = MinecraftServer.getInstanceManager().createInstanceContainer();
+        LOBBY_INSTANCE.setTime(-6000);
+        LOBBY_INSTANCE.setTimeRate(0);
+        LOBBY_INSTANCE.setTimeUpdate(null);
+        LOBBY_INSTANCE.setChunkLoader(new LobbyGenerator());
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
-            event.setSpawningInstance(lobbyInstance);
+            event.setSpawningInstance(LOBBY_INSTANCE);
             event.getPlayer().setRespawnPoint(LobbyGenerator.START);
             event.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
