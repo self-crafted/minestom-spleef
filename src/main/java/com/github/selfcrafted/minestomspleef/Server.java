@@ -61,7 +61,7 @@ public class Server {
         server.start("0.0.0.0", 25565);
     }
 
-    private static class LobbyGenerator implements IChunkLoader {
+    static class LobbyGenerator implements IChunkLoader {
         static final Pos START = new Pos(7.5, 101, 7.5);
         @Override
         public @NotNull CompletableFuture<@Nullable Chunk> loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
