@@ -46,19 +46,14 @@ public class Server {
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
             event.setSpawningInstance(lobbyInstance);
-            event.getPlayer().setRespawnPoint(new Pos(7.5, 101, 7.5));
+            event.getPlayer().setRespawnPoint(LobbyGenerator.START);
             event.getPlayer().setGameMode(GameMode.ADVENTURE);
         });
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
-            var spleefInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
-            var spleefGame = new SpleefGame(Integer.parseInt(event.getMessage()));
-            spleefInstance.setGenerator(spleefGame);
-            spleefInstance.setChunkLoader(spleefGame);
-            spleefInstance.setTime(-6000);
-            spleefInstance.setTimeRate(0);
-            spleefInstance.setTimeUpdate(null);
-            event.getPlayer().setInstance(spleefInstance, SpleefGame.START.add(0.5, 1, 0.5));
+            var spleefGame = new SpleefGame();
+            spleefGame.addPlayer(event.getPlayer());
+            spleefGame.start();
         });
 
         // Start server
@@ -67,6 +62,7 @@ public class Server {
     }
 
     private static class LobbyGenerator implements IChunkLoader {
+        static final Pos START = new Pos(7.5, 101, 7.5);
         @Override
         public @NotNull CompletableFuture<@Nullable Chunk> loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
             Chunk chunk = new DynamicChunk(instance, chunkX, chunkZ);
@@ -92,12 +88,12 @@ public class Server {
         }
     }
 
-    private static class SpleefGame implements IChunkLoader, Generator {
-        private static final Pos START = new Pos(7, 30, 7);
+    static class ArenaGenerator implements IChunkLoader, Generator {
+        static final Pos START = new Pos(7, 30, 7);
 
         private final int arenaSize;
 
-        private SpleefGame(int playerCount) {
+        ArenaGenerator(int playerCount) {
             this.arenaSize = (int) (Math.log(playerCount)*10);
         }
 
