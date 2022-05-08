@@ -57,4 +57,12 @@ public class SpleefGame {
         // TODO: 02.05.22 countdown
 
     }
+
+    private void shutdown() {
+        INSTANCE.getPlayers().forEach(player -> {
+            player.setInstance(Server.LOBBY_INSTANCE, Server.LobbyGenerator.START);
+            BOARD.removePlayer(player);
+        });
+        MinecraftServer.getInstanceManager().unregisterInstance(INSTANCE);
+    }
 }
