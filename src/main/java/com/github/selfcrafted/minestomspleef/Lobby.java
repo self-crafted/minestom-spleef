@@ -3,6 +3,7 @@ package com.github.selfcrafted.minestomspleef;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
@@ -39,6 +40,8 @@ public class Lobby {
 
         globalNode.addListener(PlayerSpawnEvent.class, event -> {
             if (event.getSpawnInstance() != LOBBY_CONTAINER) return;
+            event.getPlayer().setRespawnPoint(SPAWN);
+            event.getPlayer().setGameMode(GameMode.ADVENTURE);
             // TODO: 08.05.22 add menus for game selection and spectating
         });
 
@@ -51,6 +54,9 @@ public class Lobby {
 
         globalNode.addChild(eventNode);
     }
+
+    static void join(Player player) { player.setInstance(LOBBY_CONTAINER, SPAWN); }
+
     private static class LobbyGenerator implements IChunkLoader {
         @Override
         public @NotNull CompletableFuture<@Nullable Chunk> loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {

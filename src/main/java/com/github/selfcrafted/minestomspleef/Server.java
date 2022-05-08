@@ -37,7 +37,7 @@ public class Server {
         Lobby.init();
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
-            var spleefGame = new SpleefGame();
+            var spleefGame = new GameInstance();
             spleefGame.addPlayer(event.getPlayer());
             spleefGame.start();
         });
