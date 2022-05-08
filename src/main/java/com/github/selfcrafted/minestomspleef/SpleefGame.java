@@ -60,7 +60,7 @@ public class SpleefGame {
 
     private void shutdown() {
         INSTANCE.getPlayers().forEach(player -> {
-            player.setInstance(Server.LOBBY_INSTANCE, Server.LobbyGenerator.START);
+            player.setInstance(Lobby.LOBBY_CONTAINER, Lobby.SPAWN);
             BOARD.removePlayer(player);
         });
         MinecraftServer.getInstanceManager().unregisterInstance(INSTANCE);

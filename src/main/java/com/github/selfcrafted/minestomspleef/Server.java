@@ -2,11 +2,11 @@ package com.github.selfcrafted.minestomspleef;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.instance.*;
+import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.IChunkLoader;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.generator.GenerationUnit;
 import net.minestom.server.instance.generator.Generator;
@@ -21,8 +21,6 @@ public class Server {
 
     private static final String VELOCITY_SECRET = System.getenv("VELOCITY_SECRET");
 
-    static InstanceContainer LOBBY_INSTANCE;
-
 
     public static void main(String[] args) {
         System.setProperty("minestom.tps", "50");
@@ -36,19 +34,7 @@ public class Server {
 
         // Initialize server
         MinecraftServer server = MinecraftServer.init();
-
-        // Add lobby instance
-        LOBBY_INSTANCE = MinecraftServer.getInstanceManager().createInstanceContainer();
-        LOBBY_INSTANCE.setTime(-6000);
-        LOBBY_INSTANCE.setTimeRate(0);
-        LOBBY_INSTANCE.setTimeUpdate(null);
-        LOBBY_INSTANCE.setChunkLoader(new LobbyGenerator());
-
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
-            event.setSpawningInstance(LOBBY_INSTANCE);
-            event.getPlayer().setRespawnPoint(LobbyGenerator.START);
-            event.getPlayer().setGameMode(GameMode.ADVENTURE);
-        });
+        Lobby.init();
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
             var spleefGame = new SpleefGame();
@@ -59,33 +45,6 @@ public class Server {
         // Start server
         if (VELOCITY_SECRET != null) VelocityProxy.enable(VELOCITY_SECRET);
         server.start("0.0.0.0", 25565);
-    }
-
-    static class LobbyGenerator implements IChunkLoader {
-        static final Pos START = new Pos(7.5, 101, 7.5);
-        @Override
-        public @NotNull CompletableFuture<@Nullable Chunk> loadChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
-            Chunk chunk = new DynamicChunk(instance, chunkX, chunkZ);
-            if (chunkX == 0 && chunkZ == 0) {
-                for (int x = 0; x <= 16; x++)
-                    for (int z = 0; z <= 16; z++) {
-                        chunk.setBlock(x, 100, z, Block.QUARTZ_PILLAR);
-                        chunk.setBlock(x, 98, z, Block.IRON_BLOCK);
-                        if (x%15 == 0 || z%15 == 0) {
-                            chunk.setBlock(x, 101, z, Block.TINTED_GLASS);
-                            chunk.setBlock(x, 102, z, Block.BARRIER);
-                        }
-                    }
-                chunk.setBlock(7, 100, 7, Block.RED_STAINED_GLASS);
-                chunk.setBlock(7, 99, 7, Block.BEACON);
-            }
-            return CompletableFuture.completedFuture(chunk);
-        }
-
-        @Override
-        public @NotNull CompletableFuture<Void> saveChunk(@NotNull Chunk chunk) {
-            return CompletableFuture.completedFuture(null);
-        }
     }
 
     static class ArenaGenerator implements IChunkLoader, Generator {
