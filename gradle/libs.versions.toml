@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 
 sboard = "1.2.0"
-minestom = "8a876a4a594c1bbd0fad537a888615b90855a6ad"
+minestom = "367c389bc6ec6ed7e5c971d516964889a7561039"
 jnoise = "3.0.2"
 
 # Logging
