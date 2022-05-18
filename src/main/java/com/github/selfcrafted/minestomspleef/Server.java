@@ -13,6 +13,7 @@ import net.minestom.server.instance.generator.Generator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 public class Server {
@@ -24,7 +25,7 @@ public class Server {
 
     public static void main(String[] args) {
         System.setProperty("minestom.tps", "50");
-        System.setProperty("minestom.terminal.disabled", "");
+        if (Arrays.asList(args).contains("--no-terminal")) System.setProperty("minestom.terminal.disabled", "");
 
         MinecraftServer.LOGGER.info("Java: " + Runtime.version());
         MinecraftServer.LOGGER.info("&Name: " + VERSION);
