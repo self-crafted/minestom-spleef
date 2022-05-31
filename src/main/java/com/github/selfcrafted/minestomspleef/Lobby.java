@@ -1,23 +1,39 @@
 package com.github.selfcrafted.minestomspleef;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
+import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.*;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class Lobby {
     static final Pos SPAWN = new Pos(7.5, 101, 7.5);
+    static final ItemStack MENU_ITEM = ItemStack.builder(Material.COMPASS)
+            .displayName(Component.text("Game selection", NamedTextColor.GREEN))
+            .lore(List.of(
+                    Component.text("Left click to play", NamedTextColor.DARK_RED),
+                    Component.text("Right click to spectate", NamedTextColor.DARK_AQUA)
+            ))
+            .amount(0)
+            .build();
     static InstanceContainer LOBBY_CONTAINER;
 
     private Lobby() {}
@@ -40,16 +56,29 @@ public class Lobby {
 
         globalNode.addListener(PlayerSpawnEvent.class, event -> {
             if (event.getSpawnInstance() != LOBBY_CONTAINER) return;
-            event.getPlayer().setRespawnPoint(SPAWN);
-            event.getPlayer().setGameMode(GameMode.ADVENTURE);
-            // TODO: 08.05.22 add menus for game selection and spectating
+            var player = event.getPlayer();
+            var inventory = player.getInventory();
+            player.setRespawnPoint(SPAWN);
+            player.setGameMode(GameMode.ADVENTURE);
+            inventory.clear();
+            inventory.setItemStack(4, MENU_ITEM);
+            player.setHeldItemSlot((byte) 4);
+        });
+
+        globalNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
+        globalNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
+        globalNode.addListener(InventoryPreClickEvent.class, event -> {
+            event.setCancelled(true);
+            // TODO: 24.05.22 get arena for item
         });
 
         var eventNode = EventNode.value("lobby", EventFilter.INSTANCE,
                 instance -> instance == LOBBY_CONTAINER);
 
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
+            if (event.getItemStack() != MENU_ITEM) return;
             // TODO: 08.05.22 add menus for game selection and spectating
+            event.getPlayer().sendMessage(Component.text("MENU"));
         });
 
         globalNode.addChild(eventNode);
