@@ -2,6 +2,7 @@ package com.github.selfcrafted.minestomspleef;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
@@ -27,12 +28,13 @@ import java.util.concurrent.CompletableFuture;
 public class Lobby {
     static final Pos SPAWN = new Pos(7.5, 101, 7.5);
     static final ItemStack MENU_ITEM = ItemStack.builder(Material.COMPASS)
-            .displayName(Component.text("Game selection", NamedTextColor.GREEN))
+            .displayName(Component.text("Game selection", NamedTextColor.GREEN)
+                    .decoration(TextDecoration.ITALIC, false))
             .lore(List.of(
                     Component.text("Left click to play", NamedTextColor.DARK_RED),
                     Component.text("Right click to spectate", NamedTextColor.DARK_AQUA)
             ))
-            .amount(0)
+            .amount(1)
             .build();
     static InstanceContainer LOBBY_CONTAINER;
 
