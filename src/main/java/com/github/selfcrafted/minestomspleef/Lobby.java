@@ -17,25 +17,33 @@ import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.*;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.inventory.Inventory;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class Lobby {
     static final Pos SPAWN = new Pos(7.5, 101, 7.5);
-    static final ItemStack MENU_ITEM = ItemStack.builder(Material.COMPASS)
-            .displayName(Component.text("Game selection", NamedTextColor.GREEN)
+    static final ItemStack CREATE_ITEM = ItemStack.builder(Material.CRAFTING_TABLE)
+            .displayName(Component.text("Create game", NamedTextColor.GREEN)
                     .decoration(TextDecoration.ITALIC, false))
-            .lore(List.of(
-                    Component.text("Left click to play", NamedTextColor.DARK_RED),
-                    Component.text("Right click to spectate", NamedTextColor.DARK_AQUA)
-            ))
             .amount(1)
             .build();
+    static final ItemStack PLAY_ITEM = ItemStack.builder(Material.COMPASS)
+            .displayName(Component.text("Play", NamedTextColor.GREEN)
+                    .decoration(TextDecoration.ITALIC, false))
+            .amount(1)
+            .build();
+    static final ItemStack SPECTATE_ITEM = ItemStack.builder(Material.SPYGLASS)
+            .displayName(Component.text("Spectate", NamedTextColor.GREEN)
+                    .decoration(TextDecoration.ITALIC, false))
+            .amount(1)
+            .build();
+
     static InstanceContainer LOBBY_CONTAINER;
 
     private Lobby() {}
@@ -63,7 +71,9 @@ public class Lobby {
             player.setRespawnPoint(SPAWN);
             player.setGameMode(GameMode.ADVENTURE);
             inventory.clear();
-            inventory.setItemStack(4, MENU_ITEM);
+            inventory.setItemStack(3, CREATE_ITEM);
+            inventory.setItemStack(4, PLAY_ITEM);
+            inventory.setItemStack(5, SPECTATE_ITEM);
             player.setHeldItemSlot((byte) 4);
         });
 
@@ -78,9 +88,13 @@ public class Lobby {
                 instance -> instance == LOBBY_CONTAINER);
 
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
-            if (event.getItemStack() != MENU_ITEM) return;
-            // TODO: 08.05.22 add menus for game selection and spectating
-            event.getPlayer().sendMessage(Component.text("MENU"));
+            if (CREATE_ITEM == event.getItemStack()) {
+                event.getPlayer().openInventory(GameManager.CREATE_MENU);
+            } else if (PLAY_ITEM == event.getItemStack()) {
+                event.getPlayer().openInventory(GameManager.PLAY_MENU);
+            } else if (SPECTATE_ITEM == event.getItemStack()) {
+                event.getPlayer().openInventory(GameManager.SPECTATE_MENU);
+            }
         });
 
         globalNode.addChild(eventNode);
