@@ -24,6 +24,7 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class Lobby {
@@ -80,7 +81,7 @@ public class Lobby {
         globalNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
         globalNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
         globalNode.addListener(InventoryPreClickEvent.class, event -> {
-            event.setCancelled(true);
+            event.setCancelled(List.of(CREATE_ITEM, PLAY_ITEM, SPECTATE_ITEM).contains(event.getClickedItem()));
             // TODO: 24.05.22 get arena for item
         });
 
