@@ -37,12 +37,6 @@ public class Server {
         MinecraftServer server = MinecraftServer.init();
         Lobby.init();
 
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerChatEvent.class, event -> {
-            var spleefGame = new GameInstance();
-            spleefGame.addPlayer(event.getPlayer());
-            spleefGame.start();
-        });
-
         // Start server
         if (VELOCITY_SECRET != null) {
             VelocityProxy.enable(VELOCITY_SECRET);

@@ -2,8 +2,11 @@ package com.github.selfcrafted.minestomspleef;
 
 import com.sqcred.sboards.SBoard;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventFilter;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Enchantment;
@@ -11,9 +14,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.UUID;
 
 public class GameInstance {
     private static final ItemStack SPLEEF_ITEM = ItemStack.builder(Material.IRON_SHOVEL)
@@ -21,73 +22,52 @@ public class GameInstance {
             .meta(builder -> builder.canDestroy(Block.SAND).enchantment(Enchantment.EFFICIENCY, (short) 5).build())
             .build();
 
-    private final AtomicBoolean started = new AtomicBoolean(false);
-    private final Set<Player> playersQueue = new HashSet<>();
-    private final Set<Player> spectatorsQueue = new HashSet<>();
-
-    private SBoard BOARD;
+    private final SBoard BOARD = new SBoard(
+            (player) -> Component.text("Time left: "+0, NamedTextColor.GOLD),
+            (player) -> Arrays.asList(
+                    Component.text("Ranking:"),
+                    Component.text(player.getUsername(), NamedTextColor.GREEN),
+                    Component.text(player.getUsername(), NamedTextColor.RED)
+            )
+    );
     private final InstanceContainer INSTANCE = MinecraftServer.getInstanceManager().createInstanceContainer();
 
-    void addPlayer(Player player) {
-        if (started.get()) playerJoin(player);
-        else playersQueue.add(player);
-    }
-    void removePlayer(Player player) {
-        if (started.get()) Lobby.join(player);
-        else playersQueue.remove(player); }
-    void addSpectator(Player player) {
-        if (started.get()) spectatorJoin(player);
-        else spectatorsQueue.add(player); }
-    void removeSpectator(Player player) {
-        if (started.get()) Lobby.join(player);
-        else spectatorsQueue.remove(player); }
-
-    void start() {
-        var generator = new Server.ArenaGenerator(playersQueue.size()+1);
+    GameInstance(int players) {
+        var generator = new Server.ArenaGenerator(players);
         INSTANCE.setGenerator(generator);
         INSTANCE.setChunkLoader(generator);
         INSTANCE.setTime(-6000);
         INSTANCE.setTimeRate(0);
         INSTANCE.setTimeUpdate(null);
 
-        BOARD = new SBoard(
-                (player) -> Component.text(INSTANCE.getUniqueId().toString()),
-                (player) -> Arrays.asList(
-                        Component.text("Time left: 05:00"),
-                        Component.text("================"),
-                        Component.text(player.getUsername())
-                )
-        );
+        var eventNode = EventNode.event(INSTANCE.getUniqueId().toString(), EventFilter.PLAYER, playerEvent -> {
+            if (playerEvent instanceof PlayerSpawnEvent) return ((PlayerSpawnEvent) playerEvent).getSpawnInstance() == INSTANCE;
+            return playerEvent.getPlayer().getInstance() == INSTANCE;
+        });
 
-        playersQueue.forEach(this::playerJoin);
-        spectatorsQueue.forEach(this::playerJoin);
+        eventNode.addListener(PlayerSpawnEvent.class, event -> {
+            var player = event.getPlayer();
+            player.getInventory().clear();
+            player.setHeldItemSlot((byte) 0);
+            player.setItemInMainHand(SPLEEF_ITEM);
+            BOARD.addPlayer(player);
+            BOARD.updateAll();
+        });
 
-        BOARD.updateAll();
-
-        // TODO: 02.05.22 countdown
-
+        MinecraftServer.getGlobalEventHandler().addChild(eventNode);
     }
 
-    private void playerJoin(Player player) {
-        player.setInstance(INSTANCE, Server.ArenaGenerator.START.add(0.5, 1, 0.5));
-        player.getInventory().clear();
-        player.setHeldItemSlot((byte) 0);
-        player.setItemInMainHand(SPLEEF_ITEM);
-        BOARD.addPlayer(player);
+    public UUID getUuid() {
+        return INSTANCE.getUniqueId();
     }
 
-    private void spectatorJoin(Player player) {
-        player.setInstance(INSTANCE, Server.ArenaGenerator.START.add(0.5, 1, 0.5));
-        player.getInventory().clear();
-        player.setHeldItemSlot((byte) 0);
-        BOARD.addPlayer(player);
+    void start() {
+        // TODO: 06.06.22 start countdown
     }
 
     private void shutdown() {
-        INSTANCE.getPlayers().forEach(player -> {
-            player.setInstance(Lobby.LOBBY_CONTAINER, Lobby.SPAWN);
-            BOARD.removePlayer(player);
-        });
+        INSTANCE.getPlayers().forEach(player -> player.setInstance(Lobby.LOBBY_CONTAINER, Lobby.SPAWN));
+        BOARD.removeAll();
         MinecraftServer.getInstanceManager().unregisterInstance(INSTANCE);
     }
 
