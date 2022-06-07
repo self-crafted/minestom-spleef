@@ -17,8 +17,6 @@ import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.*;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.inventory.Inventory;
-import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
@@ -80,10 +78,8 @@ public class Lobby {
 
         globalNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
         globalNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
-        globalNode.addListener(InventoryPreClickEvent.class, event -> {
-            event.setCancelled(List.of(CREATE_ITEM, PLAY_ITEM, SPECTATE_ITEM).contains(event.getClickedItem()));
-            // TODO: 24.05.22 get arena for item
-        });
+        globalNode.addListener(InventoryPreClickEvent.class, event ->
+                event.setCancelled(List.of(CREATE_ITEM, PLAY_ITEM, SPECTATE_ITEM).contains(event.getClickedItem())));
 
         var eventNode = EventNode.value("lobby", EventFilter.INSTANCE,
                 instance -> instance == LOBBY_CONTAINER);
