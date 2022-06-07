@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public class GameManager {
-    static final Inventory CREATE_MENU = new Inventory(InventoryType.CHEST_3_ROW, Component.text("Create game"));
     static final Inventory PLAY_MENU = new Inventory(InventoryType.CHEST_6_ROW, Component.text("Play"));
     static final Inventory SPECTATE_MENU = new Inventory(InventoryType.CHEST_6_ROW, Component.text("Spectate"));
     private static final Map<UUID, GameInstance> games = new HashMap<>();

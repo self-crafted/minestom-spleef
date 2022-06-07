@@ -89,12 +89,13 @@ public class Lobby {
                 instance -> instance == LOBBY_CONTAINER);
 
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
+            var player = event.getPlayer();
             if (CREATE_ITEM == event.getItemStack()) {
-                event.getPlayer().openInventory(GameManager.CREATE_MENU);
+                player.openInventory(new CreateMenu(player).getInventory());
             } else if (PLAY_ITEM == event.getItemStack()) {
-                event.getPlayer().openInventory(GameManager.PLAY_MENU);
+                player.openInventory(GameManager.PLAY_MENU);
             } else if (SPECTATE_ITEM == event.getItemStack()) {
-                event.getPlayer().openInventory(GameManager.SPECTATE_MENU);
+                player.openInventory(GameManager.SPECTATE_MENU);
             }
         });
 
