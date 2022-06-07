@@ -13,6 +13,7 @@ import net.minestom.server.item.Enchantment;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -22,8 +23,13 @@ public class GameInstance {
             .meta(builder -> builder.canDestroy(Block.SAND).enchantment(Enchantment.EFFICIENCY, (short) 5).build())
             .build();
 
+    private int timeLeft = 60*3;
     private final SBoard BOARD = new SBoard(
-            (player) -> Component.text("Time left: "+0, NamedTextColor.GOLD),
+            (player) -> {
+                var duration = Duration.ofSeconds(timeLeft);
+                return Component.text(String.format("Time left: %02d:%02d",
+                                duration.toMinutes(), duration.toSecondsPart()), NamedTextColor.GOLD);
+                },
             (player) -> Arrays.asList(
                     Component.text("Ranking:"),
                     Component.text(player.getUsername(), NamedTextColor.GREEN),
