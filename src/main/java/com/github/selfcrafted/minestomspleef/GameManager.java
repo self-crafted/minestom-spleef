@@ -24,6 +24,7 @@ public class GameManager {
 
     public static void join(Player player, UUID game) {
         var instance = MinecraftServer.getInstanceManager().getInstance(game);
+        if (instance == null) return;
         player.setInstance(instance, Server.ArenaGenerator.START.add(0.5, 1, 0.5));
     }
 
