@@ -102,6 +102,10 @@ public class GameInstance {
         return creator;
     }
 
+    public boolean isFull() {
+        return playerAmount == players.size();
+    }
+
     public enum Status {
         QUEUE_TIMEOUT,
         WAIT_FOR_PLAYERS,
