@@ -3,7 +3,6 @@ package com.github.selfcrafted.minestomspleef;
 import com.github.selfcrafted.minestomspleef.command.LeaveCommand;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.IChunkLoader;
