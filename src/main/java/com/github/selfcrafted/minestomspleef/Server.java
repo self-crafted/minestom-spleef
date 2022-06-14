@@ -1,5 +1,6 @@
 package com.github.selfcrafted.minestomspleef;
 
+import com.github.selfcrafted.minestomspleef.command.LeaveCommand;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.player.PlayerChatEvent;
@@ -36,6 +37,7 @@ public class Server {
         // Initialize server
         MinecraftServer server = MinecraftServer.init();
         Lobby.init();
+        MinecraftServer.getCommandManager().register(new LeaveCommand());
 
         // Start server
         if (VELOCITY_SECRET != null) {
