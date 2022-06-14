@@ -80,6 +80,10 @@ public class GameInstance {
         // TODO: 06.06.22 start countdown
     }
 
+    void leave(Player player) {
+        BOARD.removePlayer(player);
+    }
+
     private void shutdown() {
         INSTANCE.getPlayers().forEach(player -> player.setInstance(Lobby.LOBBY_CONTAINER, Lobby.SPAWN));
         BOARD.removeAll();

@@ -43,6 +43,10 @@ public class GameManager {
     }
 
     public static void leave(Player player) {
+        var instance = player.getInstance();
+        if (instance == null) return;
+        var game = games.get(instance.getUniqueId());
+        game.leave(player);
         Lobby.join(player);
     }
 
