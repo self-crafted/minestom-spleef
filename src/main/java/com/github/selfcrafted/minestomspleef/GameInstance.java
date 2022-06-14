@@ -4,6 +4,7 @@ import com.sqcred.sboards.SBoard;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -12,9 +13,12 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Enchantment;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class GameInstance {
@@ -37,8 +41,13 @@ public class GameInstance {
             )
     );
     private final InstanceContainer INSTANCE = MinecraftServer.getInstanceManager().createInstanceContainer();
+    private final int playerAmount;
+    private final Player creator;
+    private final Set<Player> players = new HashSet<>();
 
-    GameInstance(int players) {
+    GameInstance(Player creator, int players) {
+        this.creator = creator;
+        this.playerAmount = players;
         var generator = new Server.ArenaGenerator(players);
         INSTANCE.setGenerator(generator);
         INSTANCE.setChunkLoader(generator);
@@ -75,6 +84,22 @@ public class GameInstance {
         INSTANCE.getPlayers().forEach(player -> player.setInstance(Lobby.LOBBY_CONTAINER, Lobby.SPAWN));
         BOARD.removeAll();
         MinecraftServer.getInstanceManager().unregisterInstance(INSTANCE);
+    }
+
+    public Set<Player> getPlayers() {
+        return this.players;
+    }
+
+    public int getTimeLeft() {
+        return timeLeft;
+    }
+
+    public int getPlayerAmount() {
+        return playerAmount;
+    }
+
+    public @NotNull Player getCreator() {
+        return creator;
     }
 
     public enum Status {

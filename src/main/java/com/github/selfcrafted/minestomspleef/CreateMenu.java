@@ -43,7 +43,7 @@ public class CreateMenu {
             if (event.getClickedItem() == MORE_PLAYERS_BUTTON) menu.addPlayer();
             else if (event.getClickedItem() == LESS_PLAYERS_BUTTON) menu.removePlayer();
             else if (event.getClickedItem() == CREATE_BUTTON) {
-                var game = GameManager.createGame(menu.playerCount);
+                var game = GameManager.createGame(player, menu.playerCount);
                 event.getPlayer().closeInventory();
                 menus.remove(player);
                 inventories.remove(player);
