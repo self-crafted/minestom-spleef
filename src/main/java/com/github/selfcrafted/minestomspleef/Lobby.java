@@ -89,9 +89,9 @@ public class Lobby {
             if (CREATE_ITEM == event.getItemStack()) {
                 player.openInventory(new CreateMenu(player).getInventory());
             } else if (PLAY_ITEM == event.getItemStack()) {
-                player.openInventory(GameManager.PLAY_MENU);
+                GameManager.openPlayMenu(player);
             } else if (SPECTATE_ITEM == event.getItemStack()) {
-                player.openInventory(GameManager.SPECTATE_MENU);
+                GameManager.openSpectateMenu(player);
             }
         });
 
