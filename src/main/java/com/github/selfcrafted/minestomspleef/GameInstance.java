@@ -4,6 +4,8 @@ import com.sqcred.sboards.SBoard;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -22,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class GameInstance {
+    private static final Pos SPECTATOR_SPAWN = Server.ArenaGenerator.START.add(0.5, 1, 0.5);
     private static final ItemStack SPLEEF_ITEM = ItemStack.builder(Material.IRON_SHOVEL)
             .displayName(Component.text("SPLEEF"))
             .meta(builder -> builder.canDestroy(Block.SAND).enchantment(Enchantment.EFFICIENCY, (short) 5).build())
@@ -62,10 +65,7 @@ public class GameInstance {
 
         eventNode.addListener(PlayerSpawnEvent.class, event -> {
             var player = event.getPlayer();
-            player.getInventory().clear();
-            player.setHeldItemSlot((byte) 0);
-            player.setItemInMainHand(SPLEEF_ITEM);
-            BOARD.addPlayer(player);
+
             BOARD.updateAll();
         });
 
@@ -80,8 +80,28 @@ public class GameInstance {
         // TODO: 06.06.22 start countdown
     }
 
+    void join(Player player) {
+        // TODO: 15.06.22 spawn the players evenly distributed in the arena
+        player.setInstance(INSTANCE, SPECTATOR_SPAWN);
+        player.setGameMode(GameMode.ADVENTURE);
+        player.getInventory().clear();
+        player.setHeldItemSlot((byte) 0);
+        player.setItemInMainHand(SPLEEF_ITEM);
+        BOARD.addPlayer(player);
+        players.add(player);
+    }
+
+    void spectate(Player player) {
+        player.setInstance(INSTANCE, SPECTATOR_SPAWN);
+        player.setGameMode(GameMode.SPECTATOR);
+        player.getInventory().clear();
+        player.setHeldItemSlot((byte) 0);
+        BOARD.addPlayer(player);
+    }
+
     void leave(Player player) {
         BOARD.removePlayer(player);
+        players.remove(player);
     }
 
     private void shutdown() {

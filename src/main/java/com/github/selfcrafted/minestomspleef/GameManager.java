@@ -72,15 +72,15 @@ public class GameManager {
         return uuid;
     }
 
-    public static void join(Player player, UUID game) {
-        var instance = MinecraftServer.getInstanceManager().getInstance(game);
-        if (instance == null) return;
-        player.setInstance(instance, Server.ArenaGenerator.START.add(0.5, 1, 0.5));
-        updateMenus(game);
+    public static void join(Player player, UUID gameId) {
+        var game = games.get(gameId);
+        game.join(player);
+        updateMenus(gameId);
     }
 
-    public static void spectate(Player player, UUID game) {
-
+    public static void spectate(Player player, UUID gameId) {
+        var game = games.get(gameId);
+        game.spectate(player);
     }
 
     public static void leave(Player player) {
