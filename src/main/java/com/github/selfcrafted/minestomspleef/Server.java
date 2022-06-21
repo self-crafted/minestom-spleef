@@ -1,6 +1,7 @@
 package com.github.selfcrafted.minestomspleef;
 
 import com.github.selfcrafted.minestomspleef.command.LeaveCommand;
+import com.github.selfcrafted.minestomspleef.command.ShutdownCommand;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.extras.velocity.VelocityProxy;
@@ -36,7 +37,9 @@ public class Server {
         // Initialize server
         MinecraftServer server = MinecraftServer.init();
         Lobby.init();
-        MinecraftServer.getCommandManager().register(new LeaveCommand());
+        var commandManager = MinecraftServer.getCommandManager();
+        commandManager.register(new LeaveCommand());
+        commandManager.register(new ShutdownCommand());
 
         // Start server
         if (VELOCITY_SECRET != null) {
