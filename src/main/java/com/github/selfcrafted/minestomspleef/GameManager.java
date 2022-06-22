@@ -15,9 +15,9 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -33,9 +33,9 @@ public class GameManager {
 
     private static final AtomicInteger displayInventoryIndex = new AtomicInteger(0);
     private static final AtomicInteger renderInventoryIndex = new AtomicInteger(1);
-    private static final Map<UUID, GameInstance> games = new HashMap<>();
-    private static final Map<UUID, ItemStack> gameToIcon = new HashMap<>();
-    private static final Map<ItemStack, UUID> iconToGame = new HashMap<>();
+    private static final Map<UUID, GameInstance> games = new ConcurrentHashMap<>();
+    private static final Map<UUID, ItemStack> gameToIcon = new ConcurrentHashMap<>();
+    private static final Map<ItemStack, UUID> iconToGame = new ConcurrentHashMap<>();
 
     static {
         var playNode = EventNode.event("playMenu", EventFilter.INVENTORY,

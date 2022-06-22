@@ -13,12 +13,12 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CreateMenu {
-    private static final Map<Player, CreateMenu> menus = new HashMap<>();
-    private static final Map<Player, Inventory> inventories = new HashMap<>();
+    private static final Map<Player, CreateMenu> menus = new ConcurrentHashMap<>();
+    private static final Map<Player, Inventory> inventories = new ConcurrentHashMap<>();
     private static final ItemStack MORE_PLAYERS_BUTTON = ItemStack.builder(Material.GREEN_DYE)
             .displayName(Component.text("More players", NamedTextColor.GREEN)).build();
     private static final ItemStack LESS_PLAYERS_BUTTON = ItemStack.builder(Material.RED_DYE)

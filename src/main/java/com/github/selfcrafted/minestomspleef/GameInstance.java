@@ -19,9 +19,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.HashSet;
+
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class GameInstance {
     private static final Pos SPECTATOR_SPAWN = Server.ArenaGenerator.START.add(0.5, 1, 0.5);
@@ -46,7 +47,7 @@ public class GameInstance {
     private final InstanceContainer INSTANCE = MinecraftServer.getInstanceManager().createInstanceContainer();
     private final int playerAmount;
     private final Player creator;
-    private final Set<Player> players = new HashSet<>();
+    private final Set<Player> players = new CopyOnWriteArraySet<>();
 
     GameInstance(Player creator, int players) {
         this.creator = creator;
