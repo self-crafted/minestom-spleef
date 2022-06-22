@@ -107,7 +107,7 @@ public class GameManager {
             var icon = generateGameIcon(game);
             var oldIcon = gameToIcon.get(uuid);
             gameToIcon.put(uuid, icon);
-            iconToGame.remove(oldIcon);
+            if (oldIcon != null) iconToGame.remove(oldIcon);
             iconToGame.put(icon, uuid);
             // redraw inventories
             for (UUID gameId : games.keySet()) {
