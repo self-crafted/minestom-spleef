@@ -50,6 +50,7 @@ public class GameManager {
             var player = event.getPlayer();
             var game = iconToGame.get(event.getClickedItem());
             join(player, game);
+            player.closeInventory();
         });
 
         spectateNode.addListener(InventoryPreClickEvent.class, event -> {
@@ -57,6 +58,7 @@ public class GameManager {
             var player = event.getPlayer();
             var game = iconToGame.get(event.getClickedItem());
             spectate(player, game);
+            player.closeInventory();
         });
 
         var eventHandler = MinecraftServer.getGlobalEventHandler();
