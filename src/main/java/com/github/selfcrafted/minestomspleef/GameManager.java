@@ -93,7 +93,7 @@ public class GameManager {
         updateMenus(uuid);
     }
 
-    private static void updateMenus(UUID uuid) {
+    static void updateMenus(UUID uuid) {
         var game = games.get(uuid);
         if (game == null) {
             // remove icon from maps and inventories

@@ -9,6 +9,7 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.block.Block;
@@ -68,6 +69,11 @@ public class GameInstance {
             var player = event.getPlayer();
 
             BOARD.updateAll();
+        });
+
+        eventNode.addListener(PlayerDisconnectEvent.class, event -> {
+            leave(event.getPlayer());
+            GameManager.updateMenus(this.getUuid());
         });
 
         MinecraftServer.getGlobalEventHandler().addChild(eventNode);
